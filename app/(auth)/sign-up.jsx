@@ -1,21 +1,21 @@
-import { StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Link, useNavigation } from "expo-router";
 import FormAuth from "../../components/FormAuth";
+import ButtonInput from "../../components/Button";
+import { register } from "../../config/redux/actions/userAction";
+
+// assets
+import passwordIcon from "../../assets/authIcon/lock.png";
 import userIcon from "../../assets/authIcon/user.png";
 import mailIcon from "../../assets/authIcon/mail.png";
-import passwordIcon from "../../assets/authIcon/lock.png";
-import { Link, useNavigation } from "expo-router";
-import ButtonInput from "../../components/Button";
-import { useToast } from "native-base";
-import axios from "axios";
-import { API_URL } from "@env";
 
 const Register = () => {
-  const toast = useToast();
   const navigation = useNavigation();
   const [payload, setPayload] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -31,23 +31,18 @@ const Register = () => {
     const data = {
       user_name: payload.name,
       user_email: payload.email,
+      user_phone: payload.phone,
       user_password: payload.password,
       confirm_password: payload.confirmPassword,
     };
-    axios.post(`${API_URL}/users/register`, data).then((res) => {
-      if (res.status === 201) {
-        navigation.navigate("(auth)", { screen: "sign-in" });
-        toast.show({
-          title: res.data.message,
-          placement: "top",
-        });
-      } else {
-        toast.show({
-          title: res.data,
-          placement: "top",
-        });
+    try {
+      const res = await register(data);
+      if (res.statusCode === 201) {
+        navigation.navigate("sign-in");
       }
-    });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -68,6 +63,13 @@ const Register = () => {
         placeholder="example@gmail.com"
         icon={mailIcon}
         onChange={(value) => handleChange("email", value)}
+      />
+      <FormAuth
+        title="Phone Number"
+        type="phone"
+        placeholder="081234567890"
+        icon={mailIcon}
+        onChange={(value) => handleChange("phone", value)}
       />
       <FormAuth
         title="Password"

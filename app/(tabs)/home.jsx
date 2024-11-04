@@ -1,22 +1,23 @@
 import {
+  RefreshControl,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
+  StatusBar,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Image, ScrollView } from "native-base";
 import { Link, useNavigation } from "expo-router";
-import axios from "axios";
-import { API_URL } from '@env';
+import { useListRecipe } from "../../config/redux/hooks/recipeHook";
 
 // assets
 import img from "../../assets/recipe1.png";
 
 const Home = () => {
   const navigation = useNavigation();
-  const [recipesList, setRecipesList] = useState([]);
+  const [onRefresh, setOnRefresh] = useState(false);
+  const [refetchKey, setRefetchKey] = useState(Date.now());
 
   const handleDetail = (id) => {
     navigation.navigate("detail/[id]", { id });
@@ -27,21 +28,21 @@ const Home = () => {
     limit: 6,
   };
 
-  useEffect(() => {
-    axios
-      .get(`https://backend-recipe-app.vercel.app/recipes`, {options})
-      .then((res) => {
-        setRecipesList(res.data.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [options]);
+  const { data: recipesList, isLoading } = useListRecipe(options, refetchKey);
+
+  const handleRefresh = () => {
+    setOnRefresh(true);
+    setRefetchKey(Date.now());
+    setOnRefresh(false);
+  };
 
   return (
     <>
       <View style={styles.container}>
-        <ScrollView>
+        <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={onRefresh} onRefresh={handleRefresh} />
+        }>
           <View style={{ marginVertical: 10, marginHorizontal: 20 }}>
             <View style={styles.search}>
               <Image
@@ -120,24 +121,26 @@ const Home = () => {
               </Link>
             </View>
             <View style={{ gap: 20 }}>
-              {recipesList.length > 0 ? (
-                recipesList.map((data, i) => (
-                  <TouchableOpacity key={i} style={styles.menu} onPress={() => handleDetail(data.recipe_id)}>
-                    <Image source={{uri: data.recipe_thumbnail}} alt="gambar" style={styles.img} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontWeight: "bold", fontSize: 16 }} numberOfLines={2}>
-                        {data.recipe_title}
-                      </Text>
-                      <Text>{data.recipe_by}</Text>
-                      <Text>{data.category_name}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text style={{ textAlign: "center" }}>
-                  You haven't made a recipe yet
-                </Text>
-              )}
+              {isLoading ?
+                <Text style={{ textAlign: "center" }}>Loading...</Text> :
+                recipesList?.length > 0 ? (
+                  recipesList?.map((data, i) => (
+                    <TouchableOpacity key={i} style={styles.menu} onPress={() => handleDetail(data.recipe_id)}>
+                      <Image source={{ uri: data.recipe_thumbnail }} alt="gambar" style={styles.img} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontWeight: "bold", fontSize: 16 }} numberOfLines={2}>
+                          {data.recipe_title}
+                        </Text>
+                        <Text>{data.recipe_by}</Text>
+                        <Text>{data.category_name}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <Text style={{ textAlign: "center" }}>
+                    You haven't made a recipe yet
+                  </Text>
+                )}
             </View>
           </View>
         </ScrollView>
@@ -153,8 +156,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     backgroundColor: "white",
-    paddingTop: 40,
-    borderColor: 'black',
+    paddingTop: StatusBar.currentHeight,
   },
   search: {
     flexDirection: "row",

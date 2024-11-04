@@ -9,8 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import { API_URL } from '@env';
+import { useUser } from "../../config/redux/hooks/userHook";
 
 // assets
 import userImg from "../../assets/user.png";
@@ -44,11 +43,28 @@ const menu = [
 ];
 
 const Profile = () => {
-  const [dataList, setDataList] = useState({});
   const navigation = useNavigation();
+  const [token, setToken] = useState(null);
 
-  const handleConfirmLogout = () => {
-    AsyncStorage.clear();
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem("token");
+        if (storedToken) {
+          setToken(storedToken);
+        }
+      } catch (error) {
+        console.error("Error fetching token:", error);
+      }
+    };
+    getData();
+  }, []);
+
+  const { data: userData, isLoading } = useUser(token);
+
+  const handleConfirmLogout = async () => {
+    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("userId");
     navigation.navigate("(auth)", { screen: "sign-in" });
   };
 
@@ -67,31 +83,11 @@ const Profile = () => {
     );
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await axios.get(
-          `${API_URL}/users/profile`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setDataList(response.data.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getData();
-  }, []);
-
   return (
     <>
       <View style={styles.picture}>
         <Image
-          source={dataList.user_photo === null ? userImg : { uri: dataList.user_photo }}
+          source={userData.user_photo === null ? userImg : { uri: userData.user_photo }}
           style={{
             backgroundColor: "white",
             borderRadius: 50,
@@ -100,7 +96,7 @@ const Profile = () => {
           }}
         />
         <Text style={{ color: "white", fontSize: 24 }}>
-          {dataList.user_name}
+          {userData.user_name}
         </Text>
       </View>
       <View style={{ alignItems: "center", flex: 1 }}>

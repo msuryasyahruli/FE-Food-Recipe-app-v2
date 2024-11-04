@@ -1,21 +1,20 @@
+import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
-import { ScrollView, TextArea, useToast } from "native-base";
-import { API_URL } from "@env";
-import axios from "axios";
+import { ScrollView, TextArea } from "native-base";
 import ButtonInput from "../../components/Button";
 import Input from "../../components/Input";
 import SelectInput from "../../components/SelectInput";
 import ImageInput from "../../components/ImageInput";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCategories } from "../../config/redux/hooks/categoryHook";
+import { postRecipe } from "../../config/redux/actions/recipeAction";
+import ShowToast from "../../config/toast";
 
 // assets
 import bookOpenIcon from "../../assets/postIcon/book-open.png";
 import videoIcon from "../../assets/postIcon/video.png";
 
 const Post = () => {
-  const toast = useToast();
-  const [options, setOptions] = useState(false);
   const [payload, setPayload] = useState({
     thumbnail: null,
     title: "",
@@ -24,16 +23,7 @@ const Post = () => {
     category: "",
   });
 
-  useEffect(() => {
-    axios
-      .get(`${API_URL}/categories`)
-      .then((res) => {
-        setOptions(res.data.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  const { data: categoryList } = useCategories();
 
   const handleChange = (name, value) => {
     setPayload({
@@ -50,41 +40,31 @@ const Post = () => {
     formData.append("recipe_video", payload.videoLink);
     formData.append("category_id", payload.category);
     formData.append("user_id", userId);
-    if (payload.thumbnail) {
+    if (payload.thumbnail !== null) {
       formData.append("recipe_thumbnail", {
         uri: payload.thumbnail,
         name: "image.jpg",
         type: "image/jpeg",
       });
     }
-    try {
-      const res = await axios.post(`${API_URL}/recipes`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      toast.show({
-        title: res.data.message,
-        placement: "top",
-      });
-      setPayload({
-        thumbnail: null,
-        title: "",
-        ingredients: "",
-        videoLink: "",
-        category: "",
+    postRecipe(formData)
+      .then(() => {
+        setPayload({
+          thumbnail: null,
+          title: "",
+          ingredients: "",
+          videoLink: "",
+          category: "",
+        });
       })
-    } catch (error) {
-      toast.show({
-        title: error,
-        placement: "top",
+      .catch((error) => {
+        ShowToast(error);
       });
-    }
   };
 
   const handleAddRecipe = () => {
     Alert.alert(
-      "Warning",
+      "Confirmation",
       "Are you sure you want to add a new recipe?",
       [
         {
@@ -122,7 +102,7 @@ const Post = () => {
               onChangeText={(value) => handleChange("ingredients", value)}
             />
             <SelectInput
-              options={options}
+              options={categoryList}
               onChange={(value) => handleChange("category", value)}
             />
             <Input
@@ -152,19 +132,5 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#EEC302",
-  },
-  input: {
-    height: 60,
-    backgroundColor: "white",
-    borderRadius: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    gap: 16,
-  },
-  hr: {
-    width: "100%",
-    height: 1,
-    backgroundColor: "#ccc",
   },
 });

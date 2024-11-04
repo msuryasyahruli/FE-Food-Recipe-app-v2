@@ -1,19 +1,16 @@
-import { Image, StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
-import FormAuth from "../../components/FormAuth";
-import { Link, useNavigation } from "expo-router";
-import ButtonInput from "../../components/Button";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useToast } from "native-base";
-import { API_URL } from "@env";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { Link, useNavigation } from "expo-router";
+import FormAuth from "../../components/FormAuth";
+import ButtonInput from "../../components/Button";
+import { login } from "../../config/redux/actions/userAction";
 
 //assets
 import mailIcon from "../../assets/authIcon/mail.png";
 import passwordIcon from "../../assets/authIcon/lock.png";
 
 const Login = () => {
-  const toast = useToast();
   const navigation = useNavigation();
   const [payload, setPayload] = useState({
     email: "",
@@ -32,22 +29,16 @@ const Login = () => {
       user_email: payload.email,
       user_password: payload.password,
     };
-    axios.post(`https://backend-recipe-app.vercel.app/users/login`, data).then((res) => {
-      if (res.status === 201) {
+    try {
+      const res = await login(data);
+      if (res.statusCode === 201) {
         navigation.navigate("(tabs)", { screen: "home" });
-        AsyncStorage.setItem("token", res.data.data.token_user);
-        AsyncStorage.setItem("userId", res.data.data.user_id);
-        toast.show({
-          title: res.data.message,
-          placement: "top",
-        });
-      } else {
-        toast.show({
-          title: res.data.message,
-          placement: "top",
-        });
+        AsyncStorage.setItem("token", res.data.token_user);
+        AsyncStorage.setItem("userId", res.data.user_id);
       }
-    });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

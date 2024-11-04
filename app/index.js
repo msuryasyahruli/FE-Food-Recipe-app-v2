@@ -14,6 +14,7 @@ export default function App() {
           const isLogin = await AsyncStorage.getItem("token");
           if (!isLogin) {
             navigation.navigate("(auth)", { screen: "sign-in" });
+            await AsyncStorage.clear();
           } else {
             navigation.navigate("(tabs)", { screen: "home" });
           }
@@ -24,7 +25,7 @@ export default function App() {
       checkToken();
     }, 200);
     return () => clearTimeout(timer);
-  }, []);
+  }, [navigation]);
 
   return (
     <View style={styles.container}>

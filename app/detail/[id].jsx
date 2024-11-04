@@ -1,11 +1,14 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "expo-router";
-import { Image, ScrollView, TextArea, useToast } from "native-base";
-import ButtonInput from "../../components/Button";
-import axios from "axios";
+import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_URL } from "@env";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSearchParams } from "expo-router";
+import { Image, ScrollView, TextArea } from "native-base";
+import ButtonInput from "../../components/Button";
+import { useDetailRecipe } from "../../config/redux/hooks/recipeHook";
+import { useListComment } from "../../config/redux/hooks/commentHook";
+import { postComment } from "../../config/redux/actions/commentAction";
+import { likeRecipe } from "../../config/redux/actions/likeActions";
+import { savedRecipe } from "../../config/redux/actions/bookmarkAction";
 
 const TABS = {
   INGREDIENTS: "Ingredients",
@@ -14,78 +17,50 @@ const TABS = {
 
 const search = () => {
   const { id } = useSearchParams();
-  const toast = useToast();
   const [activeTab, setActiveTab] = useState(TABS.INGREDIENTS);
-  const [detailList, setDetailList] = useState({});
-  const [commentList, setCommentList] = useState([]);
   const [comment, setComment] = useState("");
-  const [refetchKey, setRefetchKey] = useState(0);
+  const [refetchKey, setRefetchKey] = useState(Date.now());
 
-  useEffect(() => {
-    axios
-      .get(`${API_URL}/recipes/${id}`)
-      .then((res) => {
-        setDetailList(res.data.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [id]);
-
-  useEffect(() => {
-    axios
-      .get(`${API_URL}/comments/${id}`)
-      .then((res) => {
-        setCommentList(res.data.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [id, refetchKey]);
+  const { data: detailList, isLoading: detailLoading } = useDetailRecipe(id);
+  const { data: commentList, isLoading: commentLoading } = useListComment(id, refetchKey);
 
   const handleLike = async () => {
     try {
       const userId = await AsyncStorage.getItem("userId");
-      axios
-        .post(`${API_URL}/likeds`, {
-          recipe_id: id,
-          user_id: userId,
-        })
-        .then((res) => {
-          toast.show({
-            title: res.data.message,
-            placement: "top",
-          });
-          setRefetchKey((prevKey) => prevKey + 1);
-        })
-        .catch((error) => {
-          console.error("Error liking recipe", error);
-        });
+      const payload = {
+        recipe_id: id,
+        user_id: userId,
+      }
+      likeRecipe(payload);
     } catch (error) {
       console.error("Error liking recipe", error);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const userId = await AsyncStorage.getItem("userId");
+      const payload = {
+        recipe_id: id,
+        user_id: userId,
+      }
+      savedRecipe(payload);
+    } catch (error) {
+      console.error("Error saving recipe", error);
     }
   };
 
   const handleComment = async () => {
     try {
       const userId = await AsyncStorage.getItem("userId");
-      await axios
-        .post(`${API_URL}/comments`, {
-          recipe_id: id,
-          user_id: userId,
-          comment_text: comment,
-        })
-        .then((res) => {
-          toast.show({
-            title: res.data.message,
-            placement: "top",
-          });
-          setComment("");
-          setRefetchKey((prevKey) => prevKey + 1);
-        })
-        .catch((error) => {
-          console.error("Error comment", error);
-        });
+      const payload = {
+        recipe_id: id,
+        user_id: userId,
+        comment_text: comment,
+      };
+      await postComment(payload);
+      setComment("");
+      setRefetchKey(Date.now());
     } catch (error) {
       console.error("Error comment", error);
     }
@@ -107,7 +82,7 @@ const search = () => {
             <Text style={{ color: "white" }}>by: {detailList.recipe_by}</Text>
           </View>
           <View style={{ flexDirection: "row", gap: 8 }}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleSave}>
               <Image
                 source={require("../../assets/bookmark.png")}
                 alt="bookmarkIcon"
@@ -151,6 +126,7 @@ const search = () => {
               backgroundColor: "#FAF7ED",
               padding: 14,
               borderRadius: 20,
+              marginHorizontal: 16,
             }}
           >
             <Text>{detailList.recipe_ingredients}</Text>
@@ -158,7 +134,7 @@ const search = () => {
         )}
         {activeTab === TABS.STEP_VIDEO && (
           <ScrollView>
-            <View style={{ gap: 20 }}>
+            <View style={{ gap: 20, paddingHorizontal: 16 }}>
               <TouchableOpacity style={styles.videoBtn}>
                 <Image
                   source={require("../../assets/detailIcon/play.png")}
@@ -185,7 +161,7 @@ const search = () => {
               <ButtonInput title="Comment" onClick={handleComment} />
             </View>
 
-            <View style={{ marginTop: 20, gap: 14 }}>
+            <View style={{ marginTop: 20, gap: 14, padding: 16 }}>
               {commentList.length > 0 ? (
                 commentList?.map((data, i) => (
                   <View key={i} style={{ flexDirection: "row", gap: 12 }}>
@@ -243,7 +219,7 @@ const styles = StyleSheet.create({
   },
   main: {
     flex: 1,
-    padding: 16,
+    paddingTop: 16,
     borderTopEndRadius: 20,
     borderTopStartRadius: 20,
     gap: 10,
@@ -255,8 +231,8 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 10,
-    marginHorizontal: 10,
+    paddingBottom: 10,
+    marginHorizontal: 16,
     alignItems: "center",
   },
   activeTab: {
