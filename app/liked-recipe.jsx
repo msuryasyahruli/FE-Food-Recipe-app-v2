@@ -30,7 +30,7 @@ const LikedRecipe = () => {
       await unLikeRecipe(likedId);
       setRefetchKey(Date.now());
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -50,7 +50,7 @@ const LikedRecipe = () => {
                     <Text style={{ fontWeight: "bold" }}>{data.category_name}</Text>
                   </View>
                   <View style={{ flexDirection: "row", gap: 8 }}>
-                    <TouchableOpacity onPress={() => handleUnlike(data.liked_id)}>
+                    <TouchableOpacity onPress={() => handleUnlike(data.like_id)}>
                       <Image
                         source={require("../assets/trash.png")}
                         style={{ width: 36, height: 36 }}

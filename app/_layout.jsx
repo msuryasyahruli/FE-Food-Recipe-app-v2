@@ -1,49 +1,62 @@
-import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
 import { NativeBaseProvider } from "native-base";
 
-const profileMenuOptions = {
-  headerTitleAlign: "center",
-  headerTintColor: "#EEC302",
-};
-
 const RootLayout = () => {
   return (
     <NativeBaseProvider>
-      <Stack>
+      <Stack
+        screenOptions={{
+          animation: "slide_from_right",
+          headerTitleAlign: "center",
+          headerTintColor: "#EEC302",
+        }}
+      >
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="detail/[id]"
-          options={{ title: "", headerTransparent: true, headerTintColor: "#EEC302", }}
+          options={{
+            title: "",
+            headerTransparent: true,
+            headerTintColor: "#EEC302",
+          }}
         />
         <Stack.Screen
-          name="edit-profile"
-          options={{ title: "Edit Profile", ...profileMenuOptions }}
+          name="search/[search]"
+          options={{
+            // headerShown: false,
+            animation: "none",
+          headerTitleAlign: "left",
+        }}
         />
         <Stack.Screen
-          name="my-recipe"
-          options={{ title: "My Recipe", ...profileMenuOptions }}
+          name="edit-recipe"
+          options={{
+            presentation: "modal",
+            title: "Edit",
+            headerTintColor: "#EEC302",
+          }}
         />
-        <Stack.Screen
-          name="saved-recipe"
-          options={{ title: "Saved Recipe", ...profileMenuOptions }}
-        />
-        <Stack.Screen
-          name="liked-recipe"
-          options={{ title: "Liked Recipe", ...profileMenuOptions }}
-        />
-        <Stack.Screen
-          name="more-menu"
-          options={{ title: "All Recipe", ...profileMenuOptions }}
-        />
+        {[
+          { name: "edit-profile", title: "Edit Profile" },
+          { name: "my-recipe", title: "My Recipe" },
+          { name: "saved-recipe", title: "Saved Recipe" },
+          { name: "liked-recipe", title: "Liked Recipe" },
+          { name: "more-menu", title: "All Recipe" },
+        ].map((screen) => (
+          <Stack.Screen
+            key={screen.name}
+            name={screen.name}
+            options={{
+              title: screen.title,
+            }}
+          />
+        ))}
       </Stack>
     </NativeBaseProvider>
   );
 };
 
 export default RootLayout;
-
-const styles = StyleSheet.create({});

@@ -15,14 +15,18 @@ const TABS = {
   STEP_VIDEO: "StepVideo",
 };
 
-const search = () => {
+const Detail = () => {
   const { id } = useSearchParams();
   const [activeTab, setActiveTab] = useState(TABS.INGREDIENTS);
   const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
   const [refetchKey, setRefetchKey] = useState(Date.now());
 
-  const { data: detailList, isLoading: detailLoading } = useDetailRecipe(id);
-  const { data: commentList, isLoading: commentLoading } = useListComment(id, refetchKey);
+  const { data: detailList } = useDetailRecipe(id);
+  const { data: commentList } = useListComment(
+    id,
+    refetchKey
+  );
 
   const handleLike = async () => {
     try {
@@ -30,7 +34,7 @@ const search = () => {
       const payload = {
         recipe_id: id,
         user_id: userId,
-      }
+      };
       likeRecipe(payload);
     } catch (error) {
       console.error("Error liking recipe", error);
@@ -43,7 +47,7 @@ const search = () => {
       const payload = {
         recipe_id: id,
         user_id: userId,
-      }
+      };
       savedRecipe(payload);
     } catch (error) {
       console.error("Error saving recipe", error);
@@ -51,6 +55,7 @@ const search = () => {
   };
 
   const handleComment = async () => {
+    setLoading(true);
     try {
       const userId = await AsyncStorage.getItem("userId");
       const payload = {
@@ -64,6 +69,7 @@ const search = () => {
     } catch (error) {
       console.error("Error comment", error);
     }
+    setLoading(false);
   };
 
   return (
@@ -158,11 +164,16 @@ const search = () => {
                 value={comment}
                 onChangeText={(value) => setComment(value)}
               />
-              <ButtonInput title="Comment" onClick={handleComment} />
+              <ButtonInput
+                title="Comment"
+                onClick={handleComment}
+                disabled={!comment}
+                loading={loading}
+              />
             </View>
 
             <View style={{ marginTop: 20, gap: 14, padding: 16 }}>
-              {commentList.length > 0 ? (
+              {commentList?.length > 0 ? (
                 commentList?.map((data, i) => (
                   <View key={i} style={{ flexDirection: "row", gap: 12 }}>
                     <Image
@@ -195,7 +206,7 @@ const search = () => {
   );
 };
 
-export default search;
+export default Detail;
 
 const styles = StyleSheet.create({
   thumbnail: {

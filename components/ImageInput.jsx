@@ -1,5 +1,13 @@
-import { Animated, Easing, Image, Modal, StyleSheet, Text, View } from "react-native";
-import React, { useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "native-base";
 import * as ImagePicker from "expo-image-picker";
 import { TouchableOpacity } from "react-native";
@@ -7,7 +15,7 @@ import { TouchableOpacity } from "react-native";
 // assets
 import pictureIcon from "../assets/postIcon/picture.png";
 
-const ImageInput = ({ onChange }) => {
+const ImageInput = ({ value, onChange }) => {
   const [image, setImage] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -54,25 +62,58 @@ const ImageInput = ({ onChange }) => {
     }
   };
 
+  const handleDeleteImage = () => {
+    setImage(null);
+    onChange(null);
+    hanldeClose();
+  };
+
+  useEffect(() => {
+    setImage(value);
+  }, [value]);
+
   return (
     <>
-    <View style={styles.inputImage}>
-      {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
-      <Button
-        onPress={handleOpen}
-        borderWidth={0}
-        backgroundColor="transparent"
+      <View
+        style={[
+          styles.inputImage,
+          { backgroundColor: image ? "gray" : "white" },
+        ]}
       >
-        <Image source={pictureIcon} style={{ width: 24, height: 24 }} tintColor={"#B6B6B6"} />
-        {/* <Text>Add Photo</Text> */}
-      </Button>
-    </View>
-    
-    <Modal
-        transparent={true}
-        visible={isOpen}
-        onRequestClose={hanldeClose}
-      >
+        {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
+        <Button
+          onPress={handleOpen}
+          borderWidth={0}
+          backgroundColor="transparent"
+          style={{
+            height: "100%",
+            width: "100%",
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+        >
+          <View
+            style={{
+              alignItems: "center",
+              borderColor: image ? "#FFF" : "#B6B6B6",
+              borderWidth: 2,
+              padding: 20,
+              borderRadius: 8,
+              borderStyle: "dashed",
+            }}
+          >
+            <Image
+              source={pictureIcon}
+              style={{ width: 24, height: 24 }}
+              tintColor={image ? "#FFF" : "#B6B6B6"}
+            />
+            <Text style={{ color: image ? "#FFF" : "#B6B6B6" }}>Add Photo</Text>
+          </View>
+        </Button>
+      </View>
+
+      <Modal transparent={true} visible={isOpen} onRequestClose={hanldeClose}>
         <View style={styles.modalContainer}>
           <Animated.View
             style={[{ gap: 14 }, { transform: [{ translateY: slideUp }] }]}
@@ -81,6 +122,14 @@ const ImageInput = ({ onChange }) => {
               <TouchableOpacity style={styles.button} onPress={pickImage}>
                 <Text style={styles.buttonText}>Upload</Text>
               </TouchableOpacity>
+              {image && (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleDeleteImage}
+                >
+                  <Text style={styles.buttonText}>Delete</Text>
+                </TouchableOpacity>
+              )}
             </View>
             <TouchableOpacity style={styles.button} onPress={hanldeClose}>
               <Text style={styles.buttonText}>Cancel</Text>
@@ -96,13 +145,15 @@ export default ImageInput;
 
 const styles = StyleSheet.create({
   inputImage: {
-    backgroundColor: "white",
     borderRadius: 10,
     width: "100%",
+    height: 250,
+    position: "relative",
   },
   imagePreview: {
     height: 250,
     borderRadius: 10,
+    opacity: 0.8,
   },
   modalContainer: {
     flex: 1,

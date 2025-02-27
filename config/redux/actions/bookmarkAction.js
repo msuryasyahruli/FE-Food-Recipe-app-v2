@@ -1,11 +1,12 @@
 import ShowToast from "../../toast";
-import fetch, { BASE_URL } from "../../fetch";
+import createFetchInstance, { BASE_URL } from "../../fetch";
 
 // GET DATA
 export const fetchBookmark = (id) => async (dispatch) => {
   dispatch({ type: "GET_BOOKMARK_LOADING" });
   const url = BASE_URL + `/bookmarks/${id}`;
   try {
+    const fetch = await createFetchInstance();
     const { data } = await fetch.get(url);
     dispatch({
       type: "GET_BOOKMARK",
@@ -21,6 +22,7 @@ export const fetchBookmark = (id) => async (dispatch) => {
 export const savedRecipe = async (payload) => {
   const url = BASE_URL + "/bookmarks";
   try {
+    const fetch = await createFetchInstance();
     const { data } = await fetch.post(url, payload);
     if (data.statusCode === 201) {
       ShowToast("Recipe Saved");
@@ -37,6 +39,7 @@ export const savedRecipe = async (payload) => {
 export const unSavedRecipe = async (id) => {
   const url = BASE_URL + `/bookmarks/${id}`;
   try {
+    const fetch = await createFetchInstance();
     const { data } = await fetch.delete(url);
     if (data.statusCode === 200) {
       ShowToast("Recipe Unsaved");

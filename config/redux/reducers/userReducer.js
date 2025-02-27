@@ -14,7 +14,7 @@ const userReducer = (state = initialState, action) => {
       return { ...state, isLoading: true };
 
     case "GET_USER_FAILED":
-      return { ...state, isLoading: false, isError: payload };
+      return { ...state, isLoading: false, data: payload, isError: true };
 
     default:
       return state;

@@ -12,12 +12,13 @@ import mailIcon from "../../assets/authIcon/mail.png";
 
 const Register = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
+    user_name: "",
+    user_email: "",
+    user_phone: "",
+    user_password: "",
+    confirm_password: "",
   });
 
   const handleChange = (name, value) => {
@@ -28,21 +29,16 @@ const Register = () => {
   };
 
   const handleRegister = async () => {
-    const data = {
-      user_name: payload.name,
-      user_email: payload.email,
-      user_phone: payload.phone,
-      user_password: payload.password,
-      confirm_password: payload.confirmPassword,
-    };
+    setLoading(true);
     try {
-      const res = await register(data);
-      if (res.statusCode === 201) {
-        navigation.navigate("sign-in");
+      const res = await register(payload);
+      if (res?.statusCode === 201) {
+        navigation.replace("sign-in");
       }
     } catch (error) {
       console.error(error);
     }
+    setLoading(false);
   };
 
   return (
@@ -53,42 +49,43 @@ const Register = () => {
       <FormAuth
         title="Username"
         type="user"
-        placeholder="John Doe"
+        placeholder="Enter username"
         icon={userIcon}
-        onChange={(value) => handleChange("name", value)}
+        onChange={(value) => handleChange("user_name", value)}
       />
       <FormAuth
         title="Email"
         type="email"
-        placeholder="example@gmail.com"
+        placeholder="Enter email"
         icon={mailIcon}
-        onChange={(value) => handleChange("email", value)}
+        onChange={(value) => handleChange("user_email", value)}
       />
       <FormAuth
         title="Phone Number"
         type="phone"
-        placeholder="081234567890"
+        placeholder="Enter phone number"
         icon={mailIcon}
-        onChange={(value) => handleChange("phone", value)}
+        onChange={(value) => handleChange("user_phone", value)}
       />
       <FormAuth
         title="Password"
         type="password"
-        placeholder="********"
+        placeholder="Enter password"
         icon={passwordIcon}
-        onChange={(value) => handleChange("password", value)}
+        onChange={(value) => handleChange("user_password", value)}
       />
       <FormAuth
         title="Confirm Password"
         type="password"
-        placeholder="********"
+        placeholder="Confirm password"
         icon={passwordIcon}
-        onChange={(value) => handleChange("confirmPassword", value)}
+        onChange={(value) => handleChange("confirm_password", value)}
       />
       <ButtonInput
         title="Register"
         style={{ marginTop: 20 }}
         onClick={handleRegister}
+        loading={loading}
       />
       <Text>
         Already have account?{" "}

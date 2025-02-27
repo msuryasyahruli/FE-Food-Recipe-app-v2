@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { NativeBaseProvider, ScrollView } from "native-base";
 import { useNavigation } from "expo-router";
 import { useListRecipe } from "../config/redux/hooks/recipeHook";

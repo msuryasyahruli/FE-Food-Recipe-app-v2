@@ -1,5 +1,5 @@
-import { ShowToast } from "../../toast";
-import fetch, { BASE_URL, fetchForm } from "../../fetch";
+import ShowToast from "../../toast";
+import createFetchInstance, { BASE_URL } from "../../fetch";
 
 const setErrorListRecipe = (error = "") => ({
   type: "LIST_RECIPE_FAILED",
@@ -21,6 +21,7 @@ export const fetchListRecipe = (params) => async (dispatch) => {
   dispatch({ type: "LIST_RECIPE_LOADING" });
   const url = BASE_URL + `/recipes`;
   try {
+    const fetch = await createFetchInstance();
     const { data } = await fetch.get(url, { params });
     dispatch({
       type: "LIST_RECIPE",
@@ -38,6 +39,7 @@ export const fetchListUserRecipe = (id) => async (dispatch) => {
   dispatch({ type: "LIST_USER_RECIPE_LOADING" });
   const url = BASE_URL + `/recipes/${id}/user`;
   try {
+    const fetch = await createFetchInstance();
     const { data } = await fetch.get(url);
     dispatch({
       type: "LIST_USER_RECIPE",
@@ -54,6 +56,7 @@ export const fetchDetailRecipe = (id) => async (dispatch) => {
   dispatch({ type: "DETAIL_RECIPE_LOADING" });
   const url = BASE_URL + `/recipes/${id}`;
   try {
+    const fetch = await createFetchInstance();
     const { data } = await fetch.get(url);
     dispatch({
       type: "DETAIL_RECIPE",
@@ -69,13 +72,49 @@ export const fetchDetailRecipe = (id) => async (dispatch) => {
 export const postRecipe = async (payload) => {
   const url = BASE_URL + "/recipes";
   try {
-    const { data } = await fetchForm.post(url, payload);
+    const fetch = await createFetchInstance(true);
+    const { data } = await fetch.post(url, payload);
     if (data.statusCode === 201) {
-      ShowToast(data.message || "Recipe Successfully Added");
+      ShowToast(data.message);
       return data;
+    } else {
+      ShowToast(data.message);
     }
   } catch (error) {
     ShowToast(error.message);
+    throw error;
+  }
+};
+
+// UPDATE RECIPE
+export const updateRecipe = async (id, payload) => {
+  const url = BASE_URL + `/recipes/${id}`;
+  try {
+    const fetch = await createFetchInstance(true);
+    const { data } = await fetch.patch(url, payload);
+    if (data.statusCode === 200) {
+      ShowToast("Update Recipe Successfully");
+      return data;
+    } else {
+      ShowToast(data.message);
+    }
+  } catch (error) {
+    ShowToast(error.message);
+    throw error;
+  }
+};
+
+// DELETE RECIPE
+export const deleteRecipe = async (id) => {
+  const url = BASE_URL + `/recipes/${id}`;
+  try {
+    const fetch = await createFetchInstance();
+    const { data } = await fetch.delete(url);
+    if (data.statusCode === 200) {
+      ShowToast("Recipe Deleted");
+    }
+  } catch (error) {
+    ShowToast(error.message || "Error");
     throw error;
   }
 };

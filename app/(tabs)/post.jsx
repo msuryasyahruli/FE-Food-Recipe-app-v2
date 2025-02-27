@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StatusBar, StyleSheet, Text, View } from "react-native";
 import { ScrollView, TextArea } from "native-base";
 import ButtonInput from "../../components/Button";
 import Input from "../../components/Input";
@@ -15,6 +15,7 @@ import bookOpenIcon from "../../assets/postIcon/book-open.png";
 import videoIcon from "../../assets/postIcon/video.png";
 
 const Post = () => {
+  const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState({
     thumbnail: null,
     title: "",
@@ -33,22 +34,25 @@ const Post = () => {
   };
 
   const handleConfirmAddRecipe = async () => {
+    setLoading(true);
     const userId = await AsyncStorage.getItem("userId");
-    const formData = new FormData();
-    formData.append("recipe_title", payload.title);
-    formData.append("recipe_ingredients", payload.ingredients);
-    formData.append("recipe_video", payload.videoLink);
-    formData.append("category_id", payload.category);
-    formData.append("user_id", userId);
-    if (payload.thumbnail !== null) {
-      formData.append("recipe_thumbnail", {
-        uri: payload.thumbnail,
-        name: "image.jpg",
-        type: "image/jpeg",
-      });
-    }
-    postRecipe(formData)
-      .then(() => {
+    try {
+      const formData = new FormData();
+      formData.append("recipe_title", payload.title);
+      formData.append("recipe_ingredients", payload.ingredients);
+      formData.append("recipe_video", payload.videoLink);
+      formData.append("category_id", payload.category);
+      formData.append("user_id", userId);
+      if (payload.thumbnail !== null) {
+        formData.append("recipe_thumbnail", {
+          uri: payload.thumbnail,
+          name: "image.jpg",
+          type: "image/jpeg",
+        });
+      }
+
+      const res = await postRecipe(formData);
+      if (res?.statusCode === 201) {
         setPayload({
           thumbnail: null,
           title: "",
@@ -56,10 +60,11 @@ const Post = () => {
           videoLink: "",
           category: "",
         });
-      })
-      .catch((error) => {
-        ShowToast(error);
-      });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    setLoading(false);
   };
 
   const handleAddRecipe = () => {
@@ -85,11 +90,13 @@ const Post = () => {
           <View style={{ gap: 18, width: "100%" }}>
             <ImageInput
               onChange={(value) => handleChange("thumbnail", value)}
+              value={payload.thumbnail}
             />
             <Input
               icon={bookOpenIcon}
               placeholder={"Title"}
               onChange={(value) => handleChange("title", value)}
+              value={payload.title}
             />
             <TextArea
               placeholder="Ingredient..."
@@ -100,18 +107,25 @@ const Post = () => {
               p={5}
               fontSize="sm"
               onChangeText={(value) => handleChange("ingredients", value)}
+              value={payload.ingredients}
             />
             <SelectInput
               options={categoryList}
               onChange={(value) => handleChange("category", value)}
+              selectedValue={payload.category}
             />
             <Input
               icon={videoIcon}
               placeholder={"Link Video"}
               onChange={(value) => handleChange("videoLink", value)}
+              value={payload.videoLink}
             />
           </View>
-          <ButtonInput title="Post" onClick={handleAddRecipe} />
+          <ButtonInput
+            title="Post"
+            onClick={handleAddRecipe}
+            loading={loading}
+          />
         </View>
       </ScrollView>
     </>
@@ -126,7 +140,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 30,
     padding: 20,
-    marginTop: 48,
+    marginTop: StatusBar.currentHeight,
   },
   title: {
     fontSize: 24,

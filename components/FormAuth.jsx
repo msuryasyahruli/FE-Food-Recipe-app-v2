@@ -30,7 +30,7 @@ const FormAuth = ({ title, placeholder, type, icon, onChange }) => {
           style={type === "password" ? undefined : { display: "none" }}
           onPress={() => setOnHide(!onHide)}
         >
-          <Image source={onHide === true ? show : hide} style={styles.icon} />
+          <Image source={onHide ? show : hide} style={styles.icon} />
         </TouchableOpacity>
       </View>
     </View>
@@ -47,18 +47,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: "bold",
+    color: "#EEC302",
   },
   input: {
-    height: 50,
     backgroundColor: "white",
     borderRadius: 10,
     alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 14,
     flexDirection: "row",
     gap: 10,
   },
   text: {
+    height: 50,
     flex: 1,
   },
   icon: {

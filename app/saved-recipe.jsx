@@ -30,7 +30,7 @@ const SavedRecipe = () => {
       await unSavedRecipe(savedId);
       setRefetchKey(Date.now());
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

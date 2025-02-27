@@ -8,10 +8,12 @@ import {
   View,
 } from "react-native";
 import React, { useRef, useState } from "react";
+import { useNavigation } from "expo-router";
 
 const EditProfile = () => {
   const [isChangePicture, setChangePicture] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
 
   const openChangePicture = () => {
     setChangePicture(true);
@@ -43,7 +45,7 @@ const EditProfile = () => {
         <TouchableOpacity style={styles.menu} onPress={openChangePicture}>
           <Text>Change Profile Picture</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menu}>
+        <TouchableOpacity style={styles.menu} onPress={() => navigation.replace("(auth)", { screen: "password-recovery" })}>
           <Text>Change Password</Text>
         </TouchableOpacity>
       </View>

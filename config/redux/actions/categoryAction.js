@@ -1,11 +1,12 @@
 import ShowToast from "../../toast";
-import fetch, { BASE_URL } from "../../fetch";
+import createFetchInstance, { BASE_URL } from "../../fetch";
 
 // GET DATA
 export const fetchCategories = () => async (dispatch) => {
   dispatch({ type: "GET_CATEGORIES_LOADING" });
   const url = BASE_URL + `/categories`;
   try {
+    const fetch = await createFetchInstance();
     const { data } = await fetch.get(url);
     dispatch({
       type: "GET_CATEGORIES",

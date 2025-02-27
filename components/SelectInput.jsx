@@ -1,12 +1,16 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import React from "react";
 import { Select } from "native-base";
 
 const SelectInput = ({ options, selectedValue, onChange }) => {
+  const selectedId = options?.find(
+    (option) => option.category_name === selectedValue
+  )?.category_id;
+
   return (
     <View>
       <Select
-        selectedValue={selectedValue}
+        selectedValue={selectedId}
         accessibilityLabel="Choose Service"
         placeholder="Choose Category"
         borderRadius={10}
@@ -21,7 +25,11 @@ const SelectInput = ({ options, selectedValue, onChange }) => {
       >
         {options.length > 0 ? (
           options.map((data, i) => (
-            <Select.Item key={i} label={data.category_name} value={data.category_id} />
+            <Select.Item
+              key={i}
+              label={data.category_name}
+              value={data.category_id}
+            />
           ))
         ) : (
           <Text>no item</Text>
@@ -32,5 +40,3 @@ const SelectInput = ({ options, selectedValue, onChange }) => {
 };
 
 export default SelectInput;
-
-const styles = StyleSheet.create({});

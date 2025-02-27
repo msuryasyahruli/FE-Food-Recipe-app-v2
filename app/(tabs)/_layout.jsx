@@ -1,6 +1,6 @@
 import { View, Text, Image } from "react-native";
 import React from "react";
-import { NativeBaseProvider, StatusBar } from "native-base";
+import { NativeBaseProvider } from "native-base";
 import { Tabs } from "expo-router";
 import home from "../../assets/navIcon/home.png";
 import plus from "../../assets/navIcon/plus.png";
@@ -13,19 +13,25 @@ const TabsIcon = ({ icon, name, focused }) => {
       style={{
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: focused && "#EEF0F3",
-        height: 36,
-        width: 64,
-        borderRadius: 10
       }}
     >
-      <Image
-        source={icon}
-        resizeMode="contain"
-        tintColor={`${focused ? "#EEC302" : "#6E80B0"}`}
-        style={{ width: 24, height: 24 }}
-      />
-      {/* <Text
+      <View
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: focused && "#EEF0F3",
+          borderRadius: 18,
+          width: 72,
+          height: 36,
+        }}
+      >
+        <Image
+          source={icon}
+          tintColor={`${focused ? "#EEC302" : "#6E80B0"}`}
+          style={{ width: 24, height: 24 }}
+        />
+      </View>
+      <Text
         style={
           focused
             ? { fontWeight: "bold", color: "#EEC302" }
@@ -33,7 +39,7 @@ const TabsIcon = ({ icon, name, focused }) => {
         }
       >
         {name}
-      </Text> */}
+      </Text>
     </View>
   );
 };
@@ -41,13 +47,19 @@ const TabsIcon = ({ icon, name, focused }) => {
 const TabsLayout = () => {
   return (
     <NativeBaseProvider style={{ backgroundColor: "#EEF0F3" }}>
-      {/* <StatusBar backgroundColor="#EEF0F3" translucent={false} /> */}
-      <Tabs screenOptions={{ tabBarShowLabel: false }}>
+      <Tabs
+        screenOptions={{
+          tabBarShowLabel: false,
+          tabBarStyle: {
+            height: 70,
+          },
+          headerShown: false,
+        }}
+      >
         <Tabs.Screen
           name="home"
           options={{
             title: "Home",
-            headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabsIcon icon={home} name="Home" focused={focused} />
             ),
@@ -57,7 +69,6 @@ const TabsLayout = () => {
           name="post"
           options={{
             title: "Create",
-            headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabsIcon icon={plus} name="Create" focused={focused} />
             ),
@@ -67,7 +78,7 @@ const TabsLayout = () => {
           name="message"
           options={{
             title: "Message",
-            headerShown: false,
+            headerShown: true,
             tabBarIcon: ({ focused }) => (
               <TabsIcon icon={message} name="Message" focused={focused} />
             ),
@@ -77,7 +88,6 @@ const TabsLayout = () => {
           name="profile"
           options={{
             title: "Profile",
-            headerShown: false,
             tabBarIcon: ({ focused }) => (
               <TabsIcon icon={profile} name="Profile" focused={focused} />
             ),

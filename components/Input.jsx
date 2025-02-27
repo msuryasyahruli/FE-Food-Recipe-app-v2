@@ -1,7 +1,14 @@
+import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, TextInput, View } from "react-native";
-import React from "react";
 
-const Input = ({ icon, placeholder, onChange }) => {
+const Input = ({ value, icon, placeholder, onChange }) => {
+  const [input, setinput] = useState('');
+
+  useEffect(() => {
+    setinput(value || "");
+  }, [value])
+  
+
   return (
     <View style={styles.input}>
       <Image
@@ -10,7 +17,7 @@ const Input = ({ icon, placeholder, onChange }) => {
         style={{ width: 24, height: 24 }}
         tintColor={"#B6B6B6"}
       />
-      <TextInput placeholder={placeholder} style={{ flex: 1 }} onChangeText={onChange} />
+      <TextInput placeholder={placeholder} style={{ flex: 1 }} onChangeText={onChange} value={input} />
     </View>
   );s
 };

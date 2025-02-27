@@ -9,12 +9,14 @@ import { login } from "../../config/redux/actions/userAction";
 //assets
 import mailIcon from "../../assets/authIcon/mail.png";
 import passwordIcon from "../../assets/authIcon/lock.png";
+import logo from "../../assets/mama-recipe-logo.png";
 
 const Login = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState({
-    email: "",
-    password: "",
+    user_email: "",
+    user_password: "",
   });
 
   const handleChange = (name, value) => {
@@ -25,49 +27,44 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    const data = {
-      user_email: payload.email,
-      user_password: payload.password,
-    };
+    setLoading(true);
     try {
-      const res = await login(data);
-      if (res.statusCode === 201) {
-        navigation.navigate("(tabs)", { screen: "home" });
-        AsyncStorage.setItem("token", res.data.token_user);
+      const res = await login(payload);
+      if (res?.statusCode === 201) {
+        navigation.replace("(tabs)", { screen: "home" });
+        AsyncStorage.setItem("token", res.data.token);
         AsyncStorage.setItem("userId", res.data.user_id);
       }
     } catch (error) {
       console.error(error);
     }
+    setLoading(false);
   };
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("../../assets/mama-recipe-logo.png")}
-        style={{ margin: 10 }}
-      />
+      <Image source={logo} style={{ margin: 10 }} />
       <Text style={{ fontSize: 24, color: "#EEC302" }}>Wellcome !</Text>
       <FormAuth
         title="Email"
         type="email"
-        placeholder="example@gmail.com"
+        placeholder="Enter your email"
         icon={mailIcon}
-        onChange={(value) => handleChange("email", value)}
+        onChange={(value) => handleChange("user_email", value)}
       />
       <FormAuth
         title="Password"
         type="password"
-        placeholder="********"
+        placeholder="Enter your password"
         icon={passwordIcon}
-        onChange={(value) => handleChange("password", value)}
+        onChange={(value) => handleChange("user_password", value)}
       />
       <View style={styles.forgotLink}>
-        <Link href="/home" style={styles.linkColor}>
+        <Link href="/password-recovery" style={styles.linkColor}>
           Forgot password?
         </Link>
       </View>
-      <ButtonInput title="Login" onClick={handleLogin} />
+      <ButtonInput title="Login" onClick={handleLogin} loading={loading} />
       <Text>
         Don't have account?{" "}
         <Link href="/sign-up" style={styles.linkColor}>

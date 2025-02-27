@@ -44,28 +44,13 @@ const menu = [
 
 const Profile = () => {
   const navigation = useNavigation();
-  const [token, setToken] = useState(null);
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem("token");
-        if (storedToken) {
-          setToken(storedToken);
-        }
-      } catch (error) {
-        console.error("Error fetching token:", error);
-      }
-    };
-    getData();
-  }, []);
-
-  const { data: userData, isLoading } = useUser(token);
+  const { data: userData, isLoading } = useUser();
 
   const handleConfirmLogout = async () => {
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("userId");
-    navigation.navigate("(auth)", { screen: "sign-in" });
+    navigation.replace("(auth)", { screen: "sign-in" });
   };
 
   const handleLogout = () => {
@@ -87,7 +72,11 @@ const Profile = () => {
     <>
       <View style={styles.picture}>
         <Image
-          source={userData.user_photo === null ? userImg : { uri: userData.user_photo }}
+          source={
+            userData.user_photo === null
+              ? userImg
+              : { uri: userData.user_photo }
+          }
           style={{
             backgroundColor: "white",
             borderRadius: 50,
@@ -96,7 +85,7 @@ const Profile = () => {
           }}
         />
         <Text style={{ color: "white", fontSize: 24 }}>
-          {userData.user_name}
+          {!isLoading && userData.user_name}
         </Text>
       </View>
       <View style={{ alignItems: "center", flex: 1 }}>
