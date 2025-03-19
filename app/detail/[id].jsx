@@ -9,6 +9,7 @@ import { useListComment } from "../../config/redux/hooks/commentHook";
 import { postComment } from "../../config/redux/actions/commentAction";
 import { likeRecipe } from "../../config/redux/actions/likeActions";
 import { savedRecipe } from "../../config/redux/actions/bookmarkAction";
+import { LoaderDetail, LoaderIngredient } from "../../components/Skeleton";
 
 const TABS = {
   INGREDIENTS: "Ingredients",
@@ -22,11 +23,8 @@ const Detail = () => {
   const [loading, setLoading] = useState(false);
   const [refetchKey, setRefetchKey] = useState(Date.now());
 
-  const { data: detailList } = useDetailRecipe(id);
-  const { data: commentList } = useListComment(
-    id,
-    refetchKey
-  );
+  const { data: detailList, isLoading: recipeLoading } = useDetailRecipe(id);
+  const { data: commentList } = useListComment(id, refetchKey);
 
   const handleLike = async () => {
     try {
@@ -75,30 +73,41 @@ const Detail = () => {
   return (
     <>
       <View style={styles.thumbnail}>
-        <Image
-          source={{ uri: detailList.recipe_thumbnail }}
-          alt="thumbnail"
-          style={{ width: "100%", height: "100%" }}
-        />
-        <View style={styles.title}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.titleStyle} numberOfLines={2}>
-              {detailList.recipe_title}
-            </Text>
-            <Text style={{ color: "white" }}>by: {detailList.recipe_by}</Text>
-          </View>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <TouchableOpacity onPress={handleSave}>
-              <Image
-                source={require("../../assets/bookmark.png")}
-                alt="bookmarkIcon"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLike}>
-              <Image source={require("../../assets/like.png")} alt="likeIcon" />
-            </TouchableOpacity>
-          </View>
-        </View>
+        {recipeLoading ? (
+          <LoaderDetail />
+        ) : (
+          <>
+            <Image
+              source={{ uri: detailList.recipe_thumbnail }}
+              alt="thumbnail"
+              style={{ width: "100%", height: "100%" }}
+            />
+            <View style={styles.title}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.titleStyle} numberOfLines={2}>
+                  {detailList.recipe_title}
+                </Text>
+                <Text style={{ color: "white" }}>
+                  by: {detailList.recipe_by}
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <TouchableOpacity onPress={handleSave}>
+                  <Image
+                    source={require("../../assets/bookmark.png")}
+                    alt="bookmarkIcon"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleLike}>
+                  <Image
+                    source={require("../../assets/like.png")}
+                    alt="likeIcon"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </>
+        )}
       </View>
 
       <View style={styles.main}>
@@ -135,7 +144,11 @@ const Detail = () => {
               marginHorizontal: 16,
             }}
           >
-            <Text>{detailList.recipe_ingredients}</Text>
+            {recipeLoading ? (
+              <LoaderIngredient />
+            ) : (
+              <Text>{detailList.recipe_ingredients}</Text>
+            )}
           </View>
         )}
         {activeTab === TABS.STEP_VIDEO && (

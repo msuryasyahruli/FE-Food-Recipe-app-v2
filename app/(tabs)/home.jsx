@@ -6,11 +6,22 @@ import {
   View,
   StatusBar,
   TextInput,
+  TouchableHighlight,
 } from "react-native";
 import React, { useState } from "react";
 import { Image, ScrollView } from "native-base";
 import { Link, useNavigation } from "expo-router";
 import { useListRecipe } from "../../config/redux/hooks/recipeHook";
+import {
+  LoaderBanner,
+  LoaderCardRecipe,
+  LoaderCategory,
+} from "../../components/Skeleton";
+
+// assets
+import SoupImage from "../../assets/categoriesIcon/soup.png";
+import DessertImage from "../../assets/categoriesIcon/dessert.png";
+import SeafoodImage from "../../assets/categoriesIcon/seafood.png";
 
 const Home = () => {
   const navigation = useNavigation();
@@ -35,6 +46,25 @@ const Home = () => {
     setSearch("");
     setOnRefresh(false);
   };
+
+  const categories = [
+    {
+      img: SoupImage,
+      title: "Soup",
+    },
+    {
+      img: DessertImage,
+      title: "Chiken",
+    },
+    {
+      img: SeafoodImage,
+      title: "Seafood",
+    },
+    {
+      img: DessertImage,
+      title: "Dessert",
+    },
+  ];
 
   return (
     <>
@@ -88,19 +118,23 @@ const Home = () => {
                   marginHorizontal: 20,
                 }}
               >
-                {recipesList?.map((data, i) => (
-                  <View
-                    key={i}
-                    style={{ borderRadius: 2, position: "relative" }}
-                  >
-                    <Image
-                      source={{ uri: data.recipe_thumbnail }}
-                      alt="gambar"
-                      style={{ height: 180, width: 300, borderRadius: 12 }}
-                    />
-                    <Text style={styles.titleStyle}>{data.recipe_title}</Text>
-                  </View>
-                ))}
+                {isLoading ? (
+                  <LoaderBanner />
+                ) : (
+                  recipesList?.map((data, i) => (
+                    <View
+                      key={i}
+                      style={{ borderRadius: 2, position: "relative" }}
+                    >
+                      <Image
+                        source={{ uri: data.recipe_thumbnail }}
+                        alt="gambar"
+                        style={{ height: 180, width: 300, borderRadius: 12 }}
+                      />
+                      <Text style={styles.titleStyle}>{data.recipe_title}</Text>
+                    </View>
+                  ))
+                )}
               </View>
             </ScrollView>
           </View>
@@ -111,44 +145,27 @@ const Home = () => {
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
+                gap: 14,
               }}
             >
-              <View style={{ alignItems: "center" }}>
-                <Image
-                  source={require("../../assets/categoriesIcon/soup.png")}
-                  alt="gambar"
-                />
-                <Text>Soup</Text>
-              </View>
-              <View style={{ alignItems: "center" }}>
-                <Image
-                  source={require("../../assets/categoriesIcon/dessert.png")}
-                  alt="gambar"
-                />
-                <Text>Chiken</Text>
-              </View>
-              <View style={{ alignItems: "center" }}>
-                <Image
-                  source={require("../../assets/categoriesIcon/seafood.png")}
-                  alt="gambar"
-                />
-                <Text>Seafood</Text>
-              </View>
-              <View style={{ alignItems: "center" }}>
-                <Image
-                  source={require("../../assets/categoriesIcon/dessert.png")}
-                  alt="gambar"
-                />
-                <Text>Dessert</Text>
-              </View>
+              {isLoading ? (
+                <LoaderCategory />
+              ) : (
+                categories.map((data, i) => (
+                  <View key={i} style={{ alignItems: "center" }}>
+                    <Image source={data.img} alt="gambar" style={styles.img} />
+                    <Text>{data.title}</Text>
+                  </View>
+                ))
+              )}
             </View>
           </View>
 
-          <View style={{ marginVertical: 10, marginHorizontal: 20, gap: 10 }}>
+          <View style={{ marginVertical: 10, gap: 10 }}>
             <View
               style={{
                 flexDirection: "row",
-                justifyContent: "space-between",
+                justifyContent: "space-between", marginHorizontal: 20,
               }}
             >
               <Text style={{ fontSize: 18, fontWeight: "bold" }}>For you</Text>
@@ -159,32 +176,35 @@ const Home = () => {
                 More
               </Link>
             </View>
-            <View style={{ gap: 20 }}>
+            <View>
               {isLoading ? (
-                <Text style={{ textAlign: "center" }}>Loading...</Text>
+                <LoaderCardRecipe />
               ) : recipesList?.length > 0 ? (
                 recipesList?.map((data, i) => (
-                  <TouchableOpacity
+                  <TouchableHighlight
                     key={i}
                     style={styles.menu}
+                    underlayColor="#DDDDDD"
                     onPress={() => handleDetail(data.recipe_id)}
                   >
-                    <Image
-                      source={{ uri: data.recipe_thumbnail }}
-                      alt="gambar"
-                      style={styles.img}
-                    />
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{ fontWeight: "bold", fontSize: 16 }}
-                        numberOfLines={2}
-                      >
-                        {data.recipe_title}
-                      </Text>
-                      <Text>{data.recipe_by}</Text>
-                      <Text>{data.category_name}</Text>
-                    </View>
-                  </TouchableOpacity>
+                    <>
+                      <Image
+                        source={{ uri: data.recipe_thumbnail }}
+                        alt="gambar"
+                        style={styles.img}
+                      />
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={{ fontWeight: "bold", fontSize: 16 }}
+                          numberOfLines={2}
+                        >
+                          {data.recipe_title}
+                        </Text>
+                        <Text>{data.recipe_by}</Text>
+                        <Text>{data.category_name}</Text>
+                      </View>
+                    </>
+                  </TouchableHighlight>
                 ))
               ) : (
                 <Text style={{ textAlign: "center" }}>
@@ -233,6 +253,8 @@ const styles = StyleSheet.create({
   menu: {
     flexDirection: "row",
     gap: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   img: {
     width: 80,

@@ -1,6 +1,6 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import React from "react";
-import { Button } from "native-base";
+import { Button, Spinner } from "native-base";
 
 const ButtonInput = ({ title, onClick, style, loading, disabled }) => {
   return (
@@ -14,7 +14,7 @@ const ButtonInput = ({ title, onClick, style, loading, disabled }) => {
         onPress={onClick}
         disabled={disabled || loading}
       >
-        {loading ? "Loading..." : title}
+        <Text style={styles.text}>{loading ? <Spinner color='#EEC302' /> : title}</Text>
       </Button>
     </>
   );
@@ -28,5 +28,9 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 10,
     marginVertical: 8,
+  },
+  text: {
+    color: "white",
+    fontSize: 16,
   },
 });

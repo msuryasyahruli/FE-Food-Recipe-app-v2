@@ -45,7 +45,7 @@ const EditProfile = () => {
         <TouchableOpacity style={styles.menu} onPress={openChangePicture}>
           <Text>Change Profile Picture</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menu} onPress={() => navigation.replace("(auth)", { screen: "password-recovery" })}>
+        <TouchableOpacity style={styles.menu} onPress={() => navigation.navigate("(auth)", { screen: "password-recovery" })}>
           <Text>Change Password</Text>
         </TouchableOpacity>
       </View>

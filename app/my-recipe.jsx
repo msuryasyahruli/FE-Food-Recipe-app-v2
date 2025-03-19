@@ -5,6 +5,7 @@ import {
   Image,
   StyleSheet,
   Text,
+  TouchableHighlight,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -12,6 +13,7 @@ import { NativeBaseProvider, ScrollView } from "native-base";
 import { useNavigation } from "expo-router";
 import { useListUserRecipe } from "../config/redux/hooks/recipeHook";
 import { deleteRecipe } from "../config/redux/actions/recipeAction";
+import { LoaderCardRecipe } from "../components/Skeleton";
 
 const MyRecipe = () => {
   const navigation = useNavigation();
@@ -61,51 +63,60 @@ const MyRecipe = () => {
     <NativeBaseProvider>
       <View style={styles.container}>
         <ScrollView>
-          <View style={{ padding: 20, gap: 20 }}>
+          <View>
             {isLoading ? (
-              <Text style={{ textAlign: "center" }}>Loading...</Text>
+              <LoaderCardRecipe />
             ) : userRecipeList.length > 0 ? (
               userRecipeList.map((data, i) => (
-                <TouchableOpacity key={i} style={styles.menu}>
-                  <Image
-                    source={{ uri: data.recipe_thumbnail }}
-                    alt="thumbnail"
-                    style={styles.img}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontWeight: "bold" }}>
-                      {data.recipe_title}
-                    </Text>
-                    <Text>{data.recipe_by}</Text>
-                    <Text style={{ fontWeight: "bold" }}>
-                      {data.category_name}
-                    </Text>
-                  </View>
-                  <View style={{ flexDirection: "row", gap: 8 }}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate("edit-recipe", {
-                          id: data.recipe_id,
-                        })
-                      }
-                    >
-                      <Image
-                        source={require("../assets/edit.png")}
-                        style={{ width: 36, height: 36 }}
-                        tintColor={"green"}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => handleDelete(data.recipe_id)}
-                    >
-                      <Image
-                        source={require("../assets/trash.png")}
-                        style={{ width: 36, height: 36 }}
-                        tintColor={"red"}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
+                <TouchableHighlight
+                  key={i}
+                  style={styles.menu}
+                  underlayColor="#DDDDDD"
+                  onPress={() =>
+                    navigation.navigate("detail/[id]", { id: data.recipe_id })
+                  }
+                >
+                  <>
+                    <Image
+                      source={{ uri: data.recipe_thumbnail }}
+                      alt="thumbnail"
+                      style={styles.img}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontWeight: "bold" }}>
+                        {data.recipe_title}
+                      </Text>
+                      <Text>{data.recipe_by}</Text>
+                      <Text style={{ fontWeight: "bold" }}>
+                        {data.category_name}
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: "row", gap: 8 }}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigation.navigate("edit-recipe", {
+                            id: data.recipe_id,
+                          })
+                        }
+                      >
+                        <Image
+                          source={require("../assets/edit.png")}
+                          style={{ width: 36, height: 36 }}
+                          tintColor={"green"}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleDelete(data.recipe_id)}
+                      >
+                        <Image
+                          source={require("../assets/trash.png")}
+                          style={{ width: 36, height: 36 }}
+                          tintColor={"red"}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                </TouchableHighlight>
               ))
             ) : (
               <Text style={{ textAlign: "center" }}>
@@ -125,10 +136,13 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
     minHeight: "100%",
+    paddingVertical: 10,
   },
   menu: {
     flexDirection: "row",
     gap: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   img: {
     width: 80,

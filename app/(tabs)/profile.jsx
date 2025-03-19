@@ -3,7 +3,6 @@ import {
   Image,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
@@ -18,6 +17,7 @@ import award from "../../assets/profileIcon/award.png";
 import bookmark from "../../assets/profileIcon/bookmark.png";
 import like from "../../assets/profileIcon/like.png";
 import out from "../../assets/profileIcon/logout.png";
+import { TouchableHighlight } from "react-native";
 
 const menu = [
   {
@@ -91,40 +91,53 @@ const Profile = () => {
       <View style={{ alignItems: "center", flex: 1 }}>
         <View style={styles.mainMenu}>
           {menu.map((item, i) => (
-            <TouchableOpacity
+            <TouchableHighlight
               key={i}
               style={styles.menu}
               onPress={() => navigation.navigate(item.path)}
+              underlayColor="#DDDDDD"
             >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
-              >
+              <>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 16,
+                  }}
+                >
+                  <Image
+                    source={item.icon}
+                    tintColor={"#EEC302"}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Text>{item.title}</Text>
+                </View>
                 <Image
-                  source={item.icon}
-                  tintColor={"#EEC302"}
-                  style={{ width: 24, height: 24 }}
+                  source={require("../../assets/profileIcon/ic-chevron.png")}
+                  style={{ width: 16, height: 16 }}
+                  tintColor={"#B6B6B6"}
                 />
-                <Text>{item.title}</Text>
-              </View>
-              <Image
-                source={require("../../assets/profileIcon/ic-chevron.png")}
-                style={{ width: 16, height: 16 }}
-                tintColor={"#B6B6B6"}
-              />
-            </TouchableOpacity>
+              </>
+            </TouchableHighlight>
           ))}
-          <TouchableOpacity style={styles.menu} onPress={handleLogout}>
+          <TouchableHighlight
+            style={styles.menu}
+            onPress={handleLogout}
+            underlayColor="#DDDDDD"
+          >
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 16 }}
             >
-              <Image
-                source={out}
-                tintColor={"red"}
-                style={{ width: 24, height: 24 }}
-              />
-              <Text>Sign Out</Text>
+              <>
+                <Image
+                  source={out}
+                  tintColor={"red"}
+                  style={{ width: 24, height: 24 }}
+                />
+                <Text>Sign Out</Text>
+              </>
             </View>
-          </TouchableOpacity>
+          </TouchableHighlight>
         </View>
       </View>
     </>
@@ -148,6 +161,7 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 20,
     borderTopStartRadius: 20,
     marginTop: -50,
+    overflow: "hidden",
   },
   menu: {
     height: 64,
